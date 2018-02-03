@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>FastLED Configurator</title> 
+<style type="text/css">
+body, input{
+  font-family:arial;
+  font-size:14px;
+  padding:16px;
+}
+
+input, select{
+  border:none; 
+  padding:4px;
+  padding-left:8px;
+  margin:4px;
+}
+
+input[type=button]{
+  padding-left:4px;
+  margin-left:0px;
+}
+
+input[type=color]{
+  padding-left:4px;
+}
+
+label{
+  font-weight:700;
+}
+
+a, a:hover, a:link, a:visited{
+  color: #757575;
+}
+
+#wrap{
+  cursor:pointer;
+  font-size:24px; 
+  color:#757575;
+  font-weight:700;
+  padding-bottom:15px;
+}
+  
+#advanced_div{
+  margin-bottom: 25px;
+}
+  
+#main_title{
+  font-weight: 700;  
+  margin-bottom: 45px;
+  text-align: center;
+  font-size: 18px;
+} 
+  
+input[type=checkbox]{
+  position: relative;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #757575;
+  background: white;
+}
+  
+input[type=checkbox]:hover{
+  background: #eee;  
+}
+  
+input[type=checkbox]:active, input[type=checkbox]:checked{
+  background: #757575;  
+}
+
+.lock, .lock select, lock input{
+  color:#757575;
+}
+
+#about, #project, #effect, #instant, #event, #upload{
+  padding-bottom:35px;
+}
+
+#effect_description{
+  padding-top: 25px;
+}
+
+#bubble{
+  width: 500px;
+  min-height:200px;
+  background: #C5C5C5;
+  border: 1px solid #555;
+  position: absolute;
+}
+
+#close{
+  padding: 15px;
+  float: right;
+  cursor: pointer;
+}
+
+#colorSelector, #eventSelector{
+  padding: 35px;
+}
+
+.strip{
+  border: 1px solid #757575;
+  display: inline-flex;
+  margin-top: 15px;
+}
+
+.holder{
+  width: 26px;
+  height: 26px;
+  margin: 3px;
+  background: #858585;
+  display:inline-block;
+}
+
+.inside{
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 5px;
+  left: 5px;
+  background: #FFFFFF;
+}
+
+.column{
+  margin-left: 8.1px;
+}
+</style>
+</head>
+<body>
+  <div id="bubble">
+	<div id="close" onclick="hide('bubble');">X</div>
+	<div id="colorSelector">
+	   <label for="c_color">Color: </label>
+	   <input type="color" id="c_color" name="c_color" onchange="updateColor('c_color', true);crossUpdate(g('dummy').value);" value="#FFFFFF" />
+       <input type="text" name="c_color_rgb" id="c_color_rgb" onchange="updateColor('c_color_rgb', true);crossUpdate(g('dummy').value);" value="#FFFFFF" />
+	</div>
+	<div id="eventSelector">
+	    <label for="c_event">Event: </label>
+		<select name="c_event" id="c_event"><option value="">Coming Soon!</option></select>
+	</div>
+	<input type="hidden" id="dummy" />
+  </div>
+  <div id="main_title">FastLED Configurator</div>
+  <div id="advanced_div">
+    <label for="advanced">Advanced Mode: </label>
+    <input type="checkbox" name="advanced" id="advanced" />
+  </div>
+  <div id="wrap" onclick="handle('about');">
+    About
+  </div>
+  <div id="about">
+    The FastLED Configurator webAPP is created by DoHITB, from Dohhell Cosplay.<br /><br />
+    You can use it totally free, of course, but we will appreciate any kind of support in "like" form &lt;3 <br /><br /><br />
+    So, you can follow us on<br />
+    <a href="https://www.facebook.com/meryhelldohitb/">Facebook</a> | <a href="https://twitter.com/dohhell_cosplay">Twitter</a> | <a href="https://www.youtube.com/channel/UCBtDGzUTPlMKK_N-u8QtPnA">YouTube</a> | <a href="https://the3gamerpotato.deviantart.com/">Deviantart</a> | <a href="https://www.instagram.com/dohhell_cosplay/">Instagram</a>
+  </div>
+  <div id="wrap" onclick="handle('project');">
+    Project
+  </div>
+  <div id="project">
+    <div>
+      <label for="name">Name: </label>
+      <input type="text" name="name" id="name" placeholder="Name your project!" />
+    </div>
+    <div>
+      <label for="chipset">Chipset: </label>
+      <select name="chipset" id="chipset">
+        <option value="">Select your Chipset</option>
+      </select>
+    </div>
+    <div>
+      <label for="leds">How many LED's: </label>
+      <input type="number" name="leds" id="leds" placeholder="1" />
+    <div>
+      <label for="pin">Output Pin: </label>
+      <input type="number" name="pin" id="pin" placeholder="1" />
+    </div>
+    </div>
+    <div>
+      <input type="button" value="Create Project" id="cProject" onclick="np();"/>
+    </div>
+  </div>
+  <div id="wrap" onclick="handle('effect');">
+    Effect
+  </div> 
+  <div id="effect">
+    <label for="s_effect">Effect: </label>
+    <select name="s_effect" id="s_effect" onchange="ne();"> 
+      <option value="">Select your Effect</option>
+    </select>
+    <div id="effect_description"></div>
+    <div id="effect_options"></div>
+  </div>
+  <div id="wrap" onclick="handle('instant');">
+    Instants
+  </div>
+  <div id="instant">
+    <div>
+      Instants are a really cool way to create animations.<br />
+      Just add an Instant, set all the colors that you want, maybe some events, then add more Instants if you want!</br ><br />
+      Have in mind that all your Instants will be rendered sequentially and will be repeating while your board is powered.<br /><br />
+      Also, just for the record, if you place a lot of Instants and events, the timing will change a bit (just a few ms), or can be rounded to end in "0" or "5" because of calulation and processing.<br />
+      But don't worry, you will not notice it on the final result!<br /><br /><br />
+    </div>
+    <div><input type="button" value="Add Instant" onclick="addInstant();" /></div>
+    <div id="instants"></div>
+  </div>
+  <div id="wrap" onclick="handle('event');">
+    Events
+  </div>
+  <div id="event">
+    Coming Soon!<br /><br />
+    Here you can find a list of all Events you have setted up for your Instants.<br /><br /><br />
+  </div>
+  <div id="wrap" onclick="handle('upload');">
+    Upload
+  </div>
+  <div id="upload"> 
+	Coming Soon!<br /><br />
+    From here you can upload some instructions, and we will arrange it for you!<br /><br /><br />
+  </div>
+  <div id="wrap" onclick="handle('next');">
+    Next Steps
+  </div>
+  <div id="next">
+    Here you have a list of upcoming improvements to do to this place.
+    <ul>
+      <li>Generate Event parts (basic events)</li>
+      <li>Finish "Blink" part to Alternate Color Line</li>
+      <li>Make hover desciptions</li>
+      <li>Make languages work</li>
+      <li>Make "Advanced" button functional</li>
+      <li>Start coding some other Effects</li>
+      <li>Code some advanced events</li>
+      <li>Study integration with custom plug-ins</li>
+      <li>Study integration with more than one project handling (and merging)</li>
+      <li>Do upload part</li>
+    </ul>
+  </div>
+<script type="text/javascript">
+/*************************************************
+ * LED code generator, based on FastLED library. *
+ * 2018 - DoHITB (Dohhell Cosplay)               *
+ *************************************************/
+
+//Main variables
+project    = null;
+chipsets   = new Array("TM1803", "TM1804", "TM1809", "WS2811", "WS2812", "WS2812B", "GW6205", "GW6205_400", "UCS1903", "UCS1903B", /*"WS2801", "SM16716", "LPD8806", "WS2801", "SM16716", "LPD8806"*/);
+effects    = new Array("Color Line", "Alternate Color Line", "Color Race", "Alternate Color Race", "Fixed Color Blur", "Alternate Color Blur", "Running Color Blur", "Alternate Running Color Blur");
+parameters = new Array("CL", "ACL", "CR", "ACR", "FCB", "ACB", "RCB", "ARCB");
+
+//NOTA: Arreglar tema errores, hay que revisarlo bien...
+/**
+ * OBJECT DECLARATION
+ */
+ 
+ /**
+  * Project: Class that holds all information for the current session.
+  *
+  * Version: Current version
+  * Chipset: Identifier for the chipset user is using
+  * Name: Name of the project. Will be the source name
+  * Pin: output pin
+  * Led: array of "LED" Object, to store all vertical events
+  * Event: array of "Event" Object, to have it all enumerated
+  * Instant: array of "Instant" Object
+  * Effect: Instance for the used effect
+  * Id: just to have project identified
+  */
+function Project(chipset, name, pin){
+  this.version = "0.8 Beta";
+  this.chipset = chipset;
+  this.name    = name;
+  this.pin     = pin
+  this.led     = new Array();
+  this.event   = new Array();
+  this.instant = new Array();
+  this.effect  = null;
+  this.id      = "#P" + this.name;
+}
+
+Project.prototype.add = function(obj){
+    if(obj instanceof LED){
+	  this.led.push(obj);
+    }else if(obj instanceof Event){
+      this.event.push(obj);
+    }else if(obj instanceof Instant){
+      this.instant.push(obj)
+    }else{
+      console.log("unknown object type");
+      console.log("Ref: #Padd001");
+      return false;
+    }
+    
+    console.log("Object added");
+    return true;
+};
+
+Project.prototype.getNewInstantID = function(){return "#I" + (this.instant.length + 1);};
+Project.prototype.getLEDNumber = function(){return this.led.length;};
+
+Project.prototype.check = function(){
+    console.log("Checking project...");
+    
+    if(this.checkLED() === false)
+      return false;
+    
+    if(this.effect instanceof Effect)
+      return this.effect.check();
+    
+    return (this.checkEvent() && this.checkInstants());
+};
+
+Project.prototype.checkLED = function(){
+    console.log("    1. Checking LED...")
+    for(i = 0;i < this.led.length;i++)
+      if(!this.led[i] instanceof LED)
+        if(!this.led[i].check())
+          return false;
+    
+    console.log("    ...ok!")
+    return true;
+};
+
+Project.prototype.checkEvent = function(){
+    console.log("    2. Checking Events...");
+    for(i = 0;i < this.event.length;i++)
+      if(!this.event[i] instanceof Event)
+        if(!this.event[i].check())
+          return false;
+    
+    console.log("    ...ok!");
+    return true;
+};
+
+Project.prototype.checkInstants = function(){
+    console.log("    3. Checking Instants...")
+    for(i = 0;i < this.instant.length;i++)
+      if(!this.instant[i] instanceof Instant)
+        if(!this.instant[i].check())
+          return false;
+    
+    console.log("   ...ok!");
+    return true;
+};
+
+Project.prototype.getSource = function(){
+    grt=[];
+	grt.push('/**\r\n');
+	grt.push(' * Code downloaded via FastLED Configurator\r\n');
+	grt.push(' * Author: David O. Sole (DoHITB)\r\n');
+	grt.push(' * Version: ' + this.version + '\r\n');
+	grt.push(' * Find DoHITB on Twitter @dohitb\r\n');
+	grt.push(' * DoHITB website: escepticismoilustrado.blogspot.com\r\n');
+	grt.push(' * Dohhell Cosplay: facebook.com/meryhelldohitb/\r\n');
+	grt.push(' */\r\n\r\n');
+    grt.push('//headers\r\n');
+    grt.push('#include <FastLED.h>\r\n');
+    grt.push('#include <stdlib.h>\r\n\r\n');
+    grt.push('//LED Declaration\r\n');
+    grt.push('CRGB leds['+ this.led.length + '];\r\n\r\n');
+    grt.push('//specific variables\r\n');
+    grt.push(this.getVariables());
+    grt.push('//setup\r\n');
+    grt.push('void setup() {\r\n');
+    grt.push(this.getAddLeds());
+    grt.push('}\r\n\r\n');
+    grt.push('//loop\r\n');
+    grt.push('void loop(){\r\n');
+    grt.push(this.getSourceCode());
+    grt.push('}\r\n\r\n');
+
+	this.dlf(new Blob(grt,{type:'text/plain'}), this.name); 
+};
+
+Project.prototype.dlf = function(b, n){
+	dlfr=new FileReader();
+	dlfr.onload=function(event){dlfs=document.createElement('a');
+							    dlfs.href=event.target.result;
+								dlfs.target='_blank';
+								dlfs.download=n + '.ino';
+								dlfc=new MouseEvent('click',{'view':window,'bubbles':true,'cancelable':true});
+								dlfs.dispatchEvent(dlfc);
+								(window.URL||window.webkitURL).revokeObjectURL(dlfs.href)};
+	dlfr.readAsDataURL(b);
+};
+
+Project.prototype.getAddLeds = function(){
+  var RGB = "RGB";
+  
+  if(this.chipset == "WS2812B")
+    RGB = "GRB";
+  
+  return '    FastLED.addLeds<' + this.chipset + ', ' + this.pin + ', ' + RGB + '>(leds, ' + this.led.length + ');\r\n';
+}  
+
+Project.prototype.getSourceCode = function(){
+    str = "";
+    
+    if(this.effect instanceof Effect)
+      str = this.effect.getSourceCode(); 
+    else
+      for(i = 0;i < this.instant.length;i++)
+        str += this.instant[i].getSourceCode();
+    
+    return str;
+};
+
+Project.prototype.getVariables = function(){
+    str = "";
+    
+    if(this.effect instanceof Effect)
+      str = this.effect.getVariables();
+    else
+      for(i = 0;i < this.instant.length;i++)
+        str += this.instant[i].getVariables();
+    
+    return str;
+};
+
+function LED(id){
+  this.id    = id;
+  this.event = new Array();
+}
+
+LED.prototype.add   = function(obj){
+    if(obj instanceof Event){
+      this.event.push(obj);
+    }else{
+      console.log("unknown object type");
+      console.log("Ref: #Ladd001");
+      return false;
+    }
+    
+    console.log("Object added");
+    return true;
+};
+  
+LED.prototype.check = function(){return true;};
+
+function Instant(id, position){
+  //attributes
+  this.id       = id;
+  this.position = position;
+  this.led      = new Array();
+  this.color    = new Array();
+  this.event    = new Array();
+  this.duration = 0;
+  this.source   = "";
+}
+
+Instant.prototype.getId = function(){return this.id.substr(1);};
+
+Instant.prototype.add = function(obj){
+    if(obj instanceof LED){
+      this.led.push(obj);
+    }else if(obj instanceof Color){
+      this.color.push(obj);
+    }else if(obj instanceof Event){
+      this.event.push(obj);
+    }else{
+      console.log("unknown object type");
+      console.log("Ref: #Iadd001");
+      return false;
+    }
+    
+    console.log("Object added");
+    return true;
+};
+    
+Instant.prototype.check = function(){
+    if(this.duration <= 0)
+      return false;
+    
+    console.log("      Instant " + this.id + "...");
+    return this.checkLED() && this.checkColor() && this.checkEvent();
+};
+  
+Instant.prototype.checkLED = function(){
+    for(i = 0;i < this.led.length;i++)
+      if(!this.led[i] instanceof LED)
+        if(!this.led[i].check())
+          return false;
+    
+    return true;
+};
+  
+Instant.prototype.checkColor = function(){
+    for(i = 0;i < this.color.length;i++)
+      if(!this.color[i] instanceof Color)
+        if(!this.color[i].check())
+          return false;
+    
+    return true;
+}
+
+Instant.prototype.checkEvent = function(){
+    for(i = 0;i < this.event.length;i++)
+      if(!this.event[i] instanceof Event)
+        if(!this.event[i].check())
+          return false;
+    
+    return true;
+};
+
+Instant.prototype.getVariables = function(){
+  var ret = Array();
+  var str = Array();
+  var i   = 0;
+  
+  ret.push("//Variables from Instant " + this.id);
+  
+  for(i = 0;i < this.led.length;i++)
+	try{str.push(this.color[i].r);}catch(e){str.push("0");}
+  
+  ret.push("int " + this.getId() + "_r[" + str.length + "] = {" + str.join(", ") + "};");
+  
+  str = Array();
+  for(i = 0;i < this.led.length;i++)
+	try{str.push(this.color[i].g);}catch(e){str.push("0");}
+  
+  ret.push("int " + this.getId() + "_g[" + str.length + "] = {" + str.join(", ") + "};");
+  
+  str = Array();
+  for(i = 0;i < this.led.length;i++)
+	try{str.push(this.color[i].b);}catch(e){str.push("0");}
+
+  ret.push("int " + this.getId() + "_b[" + str.length + "] = {" + str.join(", ") + "};");
+  ret.push("int " + this.getId() + "_i = 0;\r\n\r\n");
+  
+  return ret.join("\r\n");
+};
+
+Instant.prototype.getSourceCode = function(){
+  var ret = Array();
+  var i   = 0;
+  
+  ret.push("//Code from Instant " + this.id);
+  
+  ret.push('//  base color');
+  ret.push('//  loop for each led, then set base color:');
+  ret.push('    for(' + this.getId() + '_i = 0;' + this.getId() + '_i < ' + this.led.length + ';' + this.getId() + '_i++)');
+  ret.push('        leds[' + this.getId() + '_i] = CRGB(' + this.getId() + '_r[' + this.getId() + '_i], ' + this.getId() + '_g[' + this.getId() + '_i], ' + this.getId() + '_b[' + this.getId() + '_i]);\r\n');
+  ret.push('    FastLED.show();');
+  ret.push('    delay(' + this.duration + ');\r\n\r\n');
+  
+  return ret.join("\r\n");
+}
+
+function Color(r, g, b){
+  this.r = r;
+  this.g = g;
+  this.b = b;
+}
+
+Color.prototype.check = function(){
+    if(this.r < 0 || this.r > 255)
+      return false;
+    
+    if(this.g < 0 || this.g > 255)
+      return false;
+    
+    if(this.b < 0 || this.b > 255)
+      return false;
+    
+    return true;
+};
+
+function Event(id, kind, name, parameters){
+  this.id         = id;
+  this.kind       = kind;
+  this.function   = null;
+  this.source     = "";
+  this.name       = name;
+  this.parameters = parameters;
+}
+
+Event.prototype.check = function(){
+    console.log("      Event " + this.id + ": ok");
+    return true;
+};
+
+function Effect(id, kind){
+  this.id         = id;
+  this.kind       = kind;
+  this.parameters = null; 
+}
+
+Effect.prototype.calculateId = function(){
+    for(i = 0;i < effects.length;i++)
+      if(this.kind == effects[i])
+        return i;
+    
+    return false;
+};
+  
+Effect.prototype.getParameters = function(){
+    try{
+        eval("this.parameters = new " + parameters[this.calculateId()] + "();");
+    }catch(err){
+      return false;
+    }
+};
+  
+Effect.prototype.check = function(){
+    console.log("    2. Checking Effect...");
+    if(this.id === "")
+      return false;
+    
+    if(this.calculatedId === false) 
+      return false;
+    
+    console.log("    ...ok!");
+    return true;
+};
+  
+Effect.prototype.getVariables = function(){return this.parameters.getVariables();};
+Effect.prototype.getSourceCode = function(){return this.parameters.getSourceCode();};
+
+function Parameters(){
+  this.HTMLOptions     = '';
+  this.HTMLDescription = '';
+  this.getSourceCode   = function(){};
+  this.getVariables    = function(){};
+}
+
+/**
+ * CL - Color Line
+ */
+function CL(){
+  this.color   = null;
+  this.blink   = 0;
+  this.timeon  = 0;
+  this.timeoff = 0;
+}
+
+CL.prototype = new Parameters();
+CL.prototype.constructor = CL;
+CL.prototype.addColor = function(color, number){this.color = color;};
+CL.prototype.addBlink = function(blink, number){this.blink = blink;};
+CL.prototype.addTimeon = function(timeon, number){this.timeon = timeon;};
+CL.prototype.addTimeoff = function(timeoff, number){this.timeoff = timeoff;};
+CL.prototype.HTMLDescription =     
+    'All your LED will be turned on, with same selected color.<br /><br />' + 
+    'Availabe options: <br />' + 
+    '<ul><li>Color: the color of your LED (Pick it up from the button, or type in his HEX code!)</li>' + 
+    '<li>Blink: Choose if you want your LED to blink' +
+    '<ul><li>Time on (ms): The milliseconds you want your LED to be on</li><li>Time off (ms): The milliseconds you want your LED to be off</li>' +
+    '<li>Hz: Blinks per second. Note that choosing Hz will disable previous option, and the blinking will be automatically computed.</li></ul></li></ul>';
+CL.prototype.HTMLOptions     = '<div><label for="0_color">Color: </label><input type="color" id="0_color" name="0_color" onchange="updateColor(\'0_color\');" value="#FFFFFF" />' +
+    '<input type="text" name="0_color_rgb" id="0_color_rgb" onchange="updateColor(\'0_color_rgb\');" value="#FFFFFF" /></div>' + 
+    '<div><label for="blink">Blink: </label><select name="blink" id="blink" onchange="manageBlink();"><option value="0">No blink</option><option value="1">Time manager</option><option value="2">Hz Manager</option></select></div>' + 
+    '<div><label for="timeon">Time on (ms): </label><input type="number" name="timeon" id="timeon" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" />' + 
+    '<label for="timeoff">Time off (ms): </label><input type="number" name="timeoff" id="timeoff" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" /></div>' + 
+    '<div><label for="hz">Hz: </label><input type="number" name="hz" id="hz" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" /></div>';
+CL.prototype.getVariables = function(){ 
+  str = [];
+  str.push('//base color\r\n');
+  str.push('int color_r = ' + this.color.r + ';\r\n');
+  str.push('int color_g = ' + this.color.g + ';\r\n');
+  str.push('int color_b = ' + this.color.b + ';\r\n\r\n');
+  
+  if(this.blink > 0){
+    str.push('//blinking zone\r\n');
+    str.push('int timeon  = ' + this.timeon + ';\r\n');
+    str.push('int timeoff = ' + this.timeoff + ';\r\n\r\n');
+  }
+  
+  return str.join("");
+};
+
+CL.prototype.getSourceCode = function(){
+  str = [];
+  str.push('//  base color\r\n');
+  str.push('//  loop for each led, then set base color:\r\n');
+  str.push('    int i = 0;\r\n\r\n');
+  str.push('    for(i = 0;i < ' + project.led.length + ';i++)\r\n');
+  str.push('        leds[i] = CRGB(color_r, color_g, color_b);\r\n\r\n');
+  str.push('    FastLED.show();\r\n');
+  
+  if(this.blink > 0){
+    str.push('//  split into two steps. Color step and dark step.\r\n')
+    str.push('    delay(timeon);\r\n\r\n');
+    str.push('//  dark step\r\n')
+    str.push('    for(i = 0;i < ' + project.led.length + ';i++)\r\n');
+    str.push('        leds[i] = CRGB(0, 0, 0);\r\n\r\n');
+    str.push('    FastLED.show();\r\n');
+    str.push('    delay(timeoff);\r\n');
+  }else{
+    str.push('    delay(50);\r\n')
+  }
+   
+  return str.join(""); 
+};
+
+
+/**
+ * ACL - Alternate Color Line
+ */
+function ACL(){
+  this.color      = new Array();
+  this.duration   = new Array();
+  this.blink      = new Array();
+  this.timeon     = new Array();
+  this.timeoff    = new Array();
+  this.colorCount = 0;
+}
+
+ACL.prototype = new Parameters();
+ACL.prototype.constructor = ACL;
+ACL.prototype.addColor = function(color, number){if(color instanceof Color){this.color[number] = color;}};
+ACL.prototype.addDuration = function(duration, number){this.duration[number] = duration;};
+ACL.prototype.addBlink = function(blink, number){this.blink[number] = blink;};
+ACL.prototype.addTimeon = function(timeon, number){this.timeon[number] = timeon;};
+ACL.prototype.addTimeoff = function(timeoff, number){this.timeoff[number] = timeoff;};
+ACL.prototype.HTMLDescription =     
+    'All your LED will be turned on, with same selected color.<br /> You can choose any number of steps and set a time and color for each<br /><br />' + 
+    'Availabe options: <br />' + 
+    '<ul><li>Color: the color of your LED (Pick it up from the button, or type in his HEX code!)</li>' + 
+    '<li>Time step (ms): the time your color will be shown. Set a global timing, or one for each step, you decide!</li>' + 
+    '<li>Blink: Choose if you want your LED to blink [Coming soon!]' +
+    '<ul><li>Time on (ms): The milliseconds you want your LED to be on</li><li>Time off (ms): The milliseconds you want your LED to be off</li>' +
+    '<li>Hz: Blinks per second. Note that choosing Hz will disable previous option, and the blinking will be automatically computed.</li></ul></li></ul>';
+ACL.prototype.HTMLOptions     = '<div><label for="0_color">Color: </label><input type="color" id="0_color" name="0_color" onchange="updateColor(\'0_color\');" value="#FFFFFF" />' +
+    '<input type="text" name="0_color_rgb" id="0_color_rgb" onchange="updateColor(\'0_color_rgb\');" value="#FFFFFF" /></div>' + 
+    '<div><label for="0_timestep">Time Step (ms): </label><input type="number" name="0_timestep" id="0_timestep" placeholder="1" onchange="manageDuration(0);" /></div>' +
+    '<div><label for="blink">Blink: </label><select name="blink" id="blink" onchange="manageBlink();"><option value="0">No blink</option><option value="1">Time manager</option><option value="2">Hz Manager</option></select></div>' + 
+    '<div><label for="timeon">Time on (ms): </label><input type="number" name="timeon" id="timeon" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" />' + 
+    '<label for="timeoff">Time off (ms): </label><input type="number" name="timeoff" id="timeoff" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" /></div>' + 
+    '<div><label for="hz">Hz: </label><input type="number" name="hz" id="hz" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink();" /></div>' + 
+    '<div id="extra"></div><div><input type="button" value="Add color" onclick="addNode();" /></div>';
+ACL.prototype.getVariables = function(){ 
+  str = [];
+  str.push('//base color\r\n');
+  
+  aux = [];
+  for(i = 0;i < this.color.length;i++)
+    aux.push(this.color[i].r);
+  
+  str.push('int color_r[' + this.color.length + '] = {' + aux.join(", ") + '};\r\n');
+  
+  
+  aux = [];
+  for(i = 0;i < this.color.length;i++)
+    aux.push(this.color[i].g);
+  
+  str.push('int color_g[' + this.color.length + '] = {' + aux.join(", ") + '};\r\n');
+  
+  
+  aux = [];
+  for(i = 0;i < this.color.length;i++)
+    aux.push(this.color[i].b);
+  
+  str.push('int color_b[' + this.color.length + '] = {' + aux.join(", ") + '};\r\n\r\n');
+  
+  
+  aux = [];
+  for(i = 0;i < this.duration.length;i++)
+    aux.push(this.duration[i]);
+  
+  str.push('//duration of each color\r\n')
+  str.push('int times[' + this.duration.length + '] = {' + aux.join(", ") + '};\r\n\r\n');
+  str.push('//number of colors\r\n');
+  str.push('int colorNumber = ' + this.color.length + ';\r\n\r\n');
+  
+  /*if(this.blink > 0){
+    str.push('//blinking zone\r\n');
+    str.push('int timeon  = ' + this.timeon + ';\r\n');
+    str.push('int timeoff = ' + this.timeoff + ';\r\n\r\n');
+  }*/
+  
+  return str.join("");
+};
+
+ACL.prototype.getSourceCode = function(){
+  str = []; 
+  str.push('//  Various colors\r\n');
+  str.push('    int i = 0;\r\n');
+  str.push('    int j = 0;\r\n\r\n');
+  str.push('//  For each color\r\n')
+  str.push('    for(i = 0;i < colorNumber;i++){\r\n');
+  str.push('//      loop for each led, then set base color:\r\n');
+  str.push('        for(j = 0;j < ' + project.led.length + ';j++){\r\n');
+  str.push('            leds[j] = CRGB(color_r[i], color_g[i], color_b[i]);\r\n');
+  str.push('        }\r\n\r\n');
+  str.push('        FastLED.show();\r\n\r\n');
+  str.push('//      then wait for the specified time\r\n');
+  str.push('        delay(times[i]);\r\n');
+  str.push('    }\r\n\r\n');
+  
+  /*if(this.blink > 0){
+    str.push('//  split into two steps. Color step and dark step.\r\n')
+    str.push('    delay(timeon);\r\n\r\n');
+    str.push('//  dark step\r\n')
+    str.push('    for(i = 0;i < ' + project.led.length + ';i++)\r\n');
+    str.push('        leds[i] = CRGB(0, 0, 0);\r\n\r\n');
+    str.push('    FastLED.show();\r\n');
+    str.push('    delay(timeoff);\r\n');
+  }else{
+    str.push('    delay(50);\r\n')
+  }*/
+   
+  return str.join(""); 
+};
+
+/**
+ * Object handling
+ */
+function np(){
+  reset();
+  e = g('chipset');
+  
+  if(newProject(e.options[e.selectedIndex].value, g('name').value, g('leds').value, g('pin').value)){
+    console.log("new project created");
+    unlock("effect");
+    unlock("instant");
+    unlock("event");
+  }
+}
+
+function ne(){
+  reset();
+  e = g('s_effect');
+  
+  if(newEffect(e.options[e.selectedIndex].value)){
+    console.log("new effect created");
+    updateScreen();
+  }
+}
+
+function newProject(chipset, name, ledNumber, pin){
+  if(createProject(chipset, name, pin))
+    setProjectLeds(ledNumber);
+  else
+    return false;
+  
+  return true;
+}
+
+function newInstant(position){
+  instant = new Instant(project.getNewInstantID(), position)
+  setInstantLeds(instant, project.getLEDNumber());
+  project.add(instant);
+  updateScreen();
+}
+
+function newEffect(id){
+  if(!validateEffect(id)){
+    console.log("unkwnown effect type: " + id);
+    console.log("Ref: #NEve001")
+    setError("NEve001");
+    
+    return false;
+  }
+   
+  project.effect = new Effect("#E" + id, id);
+  project.effect.getParameters();
+  
+  return true;
+}
+
+function createProject(chipset, name, pin){
+  if(!validateChipset(chipset)){
+    console.log("unkwnown chipset type: " + chipset);
+    console.log("Ref: #CPvc001")
+    setError("CPvc001");
+    
+    return false;
+  }
+  
+  if(!validateName(name)){
+    console.log("wrong name: " + name);
+    console.log("Ref: #CPvc002")
+    setError("CPvc002");
+    
+    return false;
+  }
+  
+  project = new Project(chipset, name, pin);
+  return true;
+}
+
+function setProjectLeds(led){
+  for(i = 0;i < led;i++){
+    temp = new LED("#L" + i);
+    project.add(temp);
+  }
+}
+
+function setInstantLeds(instant, led){
+  instant.led = new Array();
+  
+  for(i = 0;i < led;i++){
+    temp = new LED(instant.id + "L" + i);
+    instant.add(temp);
+  }
+}
+
+function validateChipset(chipset){
+  for(i = 0;i < chipsets.length;i++)
+    if(chipset == chipsets[i])
+      return true;
+  
+  return false;
+}
+
+function validateName(name){
+  if(name === "")
+    return false;
+  
+  return true; 
+}
+
+function validateEffect(effect){
+  for(i = 0;i < effects.length;i++)
+    if(effect == effects[i])
+      return true;
+  
+  return false;
+}
+
+/**
+ * html handling
+ */
+init();
+
+function init(){
+  var divs = new Array("about", "project", "effect", "instant", "event", "upload", "next");
+  
+  for(i = 0;i < divs.length;i++)
+    eval("div_" + divs[i] + " = 0;");
+  
+  fillSelect();
+  
+  //hide everyting but info
+  for(i = 1;i < divs.length;i++)
+      handle(divs[i]);
+  
+  //lock everything but info and project
+  for(i = 2;i < divs.length;i++)
+      lock(divs[i]);
+   
+  //unlock upload and next
+  unlock("upload");
+  unlock("next");
+  
+  //hide bubble
+  hide("bubble");
+}  
+ 
+function fillSelect(){
+  s = g("chipset");
+  
+  for(i = 0;i < chipsets.length;i++)
+    s.add(new Option(chipsets[i], chipsets[i]));
+  
+  s = g("s_effect");
+  
+  for(i = 0;i < effects.length;i++)
+    s.add(new Option(effects[i], effects[i]));
+}
+
+function g(id){return document.getElementById(id);}
+function hide(id){g(id).style.display = "none";g(id).style.zIndex = "-1";}
+function show(id){g(id).style.display = "block";g(id).style.zIndex = "1";}
+function lock(id){g(id).style.pointerEvents="none";g(id).className="lock";}
+function unlock(id){g(id).style.pointerEvents="initial";g(id).className="";}
+function handle(id){
+  eval("div_" + id + "++;");
+  eval("temp = div_" + id + " % 2;");
+  
+  if(temp === 0){
+    show(id);
+  }else{
+    hide(id);
+  }
+} 
+
+function setError(id){
+  /*
+   * CPvc001: Wrong chipset
+   * CPvc002: Wrong name
+   * NEve001: Wrong event
+   */
+  e = null;
+  
+  if(id == "CPvc001"){
+    e = g('chipset');
+  }else if(id == "CPvc002"){
+    e = g('name');
+  }else if(id == "NEve001"){
+    e = g('s_effect');
+  }else{
+    e = false;
+  }
+  
+  if(!e)
+    return false;
+  
+  e.style.backgroundColor = 'red';
+}
+
+function reset(){
+  g('chipset').style.backgroundColor = '';
+  g('name').style.backgroundColor = '';
+  g('s_effect').style.backgroundColor = '';
+}
+  
+/**
+ * Screen updating
+ */
+function updateScreen(){
+  if(project.effect instanceof Effect){
+    lock("instant");
+    lock("event");
+    showDescription();
+    generateOptions();
+  }else if(project.effect == null){
+    unlock("instant");
+    unlock("event");
+  }
+  
+  if(project.check()){
+    generateButton();
+  }else{
+    npButton();
+  }
+}
+
+function generateButton(){
+  g('cProject').value = "Get source";
+  g('cProject').onclick = function(){project.getSource();};
+  lock('name');
+  lock('chipset');
+  lock('leds');
+  lock('pin');
+}
+
+function npButton(){
+  g('cProject').value = "Create Project";
+  g('cProject').onclick = function(){np();};
+}
+
+function showDescription(){
+  g('effect_description').innerHTML = '';
+  effectID = project.effect.calculateId();
+  
+  if(effectID === false)
+    return false;
+  
+  try{
+    g('effect_description').innerHTML = project.effect.parameters.HTMLDescription;
+  }catch(e){
+    g('effect_description').innerHTML = 'Looks like the effect you selected is not working yet. Try again in a few days :)';
+  }
+  
+  return true;
+}
+
+function generateOptions(){
+  g('effect_options').innerHTML = '';
+  effectID = project.effect.calculateId();
+  
+  if(effectID === false)
+    return false;
+  
+  g('effect_options').innerHTML = project.effect.parameters.HTMLOptions;
+  return true;
+}
+
+function addInstant(){ 
+  var count = (project.instant.length + 1);
+  var lim   = project.led.length;
+  
+  if(count === 1){
+    var header = document.createElement("div");
+    str = "";
+    
+    for(i = 0;i < lim;i++){
+      if(i === 0){
+        str += '<input type="checkbox" style="margin-left:33px;" class="column" name="0_' + i + '_c" id="0_' + i + '_c" onclick="manageInstant(\'0_' + i + '_c\', event);cancelBubble(event)" /> ';
+      }else{
+        str += '<input type="checkbox" class="column" name="0_' + i + '_c" id="0_' + i + '_c" onclick="manageInstant(\'0_' + i + '_c\', event);cancelBubble(event)" /> ';
+      }
+    }
+    
+    header.innerHTML = str;
+    g('instants').appendChild(header);
+  } 
+  
+  var nDiv = document.createElement("div");
+  str = '<div><input type="checkbox" name="' + count + '_all" id="' + count + '_all" onclick="manageInstant(\'' + count + '_all\', event);cancelBubble(event)" /><div class="strip">';
+  
+  for(i = 0;i < lim;i++){
+    str += '<div class="holder" id="' + count + '_' + i + '_h" onclick="manageInstant(\'' + count + '_' + i + '_h\', event);cancelBubble(event);"><div class="inside" style="background:#FFFFFF;" id="' + count + '_' + i + '_i" onclick="manageInstant(\'' + count + '_' + i + '_i\', event);cancelBubble(event);"></div></div>';
+  }
+  
+  str += '</div><label for="' + count + '_duration">Duration (ms): </label><input type="number" name="' + count + '_duration" id="' + count + '_duration" onchange="manageInstantDuration(\'' + count + '_duration\');cancelBubble(event);" /></div>';
+  nDiv.innerHTML = str;
+  g('instants').appendChild(nDiv);
+  newInstant(count);
+}
+
+function manageInstantDuration(id){
+  var parts = id.split("_");
+  
+  project.instant[(parts[0] - 1)].duration = g(id).value;
+}
+
+function manageInstant(id, event){
+  //manage position
+  managePosition(event);
+  
+  var parts = id.split("_");
+  show("bubble");
+  
+  //move id to dummy
+  g('dummy').value = id;
+  
+  if(parts.length === 2){
+    //x_all
+	//get most common color and event-set (row). If more than one option, set override warning
+	//if check is not selected do not show popup
+      if(!g(id).checked){
+        hide("bubble");
+        return false;
+      }
+	//unlock all
+	unlock('colorSelector');
+	unlock('eventSelector');
+  }else if(parts.length === 3){
+	if(parts[2] === 'c'){
+	  //0_x_c
+	  //get most common color and event-set (column). If more than one option, set override warning
+	  //if check is not selected do not show popup
+      if(!g(id).checked){
+        hide("bubble");
+        return false;
+      }
+	  //unlock all
+	  unlock('colorSelector');
+	  unlock('eventSelector');
+	}else if(parts[2] === 'h'){
+	  //x_y_h
+	  //getEvent
+	  
+	  //lock color, unlock event
+	  lock('colorSelector');
+	  unlock('eventSelector');
+	}else if(parts[2] === 'i'){
+	  //x_y_i
+	  //getColor
+	  var color = g(id).style.background.split("(");
+	  color = color[1].split(")");
+	  color = color[0].split(", ");
+	  
+	  for(i = 0;i < 3;i++)
+	    if(color[i] == 0)
+		  color[i] = "00";
+		else
+		  color[i] = parseInt(color[i]).toString(16).toUpperCase();
+		  
+	  color = "#" + color[0] + color[1] + color[2];
+	  g('c_color_rgb').value = color;
+	  updateColor('c_color_rgb', true);
+	  
+	  //unlock color, lock event
+	  unlock('colorSelector');
+	  lock('eventSelector');
+	}
+  }
+}
+
+function cancelBubble(e){
+    e.cancelBubble = true;
+    if(e.stopPropagation)
+     e.stopPropagation();
+}
+
+function crossUpdate(id){
+  g(id).style.background = g('c_color_rgb').value;
+  
+  var parts = id.split("_");
+  
+  if(parts.length === 2){
+	//x_all
+  }else if(parts.length === 3){
+  	if(parts[2] === 'c'){
+	  //0_x_c
+
+	}else if(parts[2] === 'h'){
+	  //x_y_h
+
+	}else if(parts[2] === 'i'){
+	  //x_y_i: update LED color.
+	  //Don't use "add", as a white LED may mess up everything
+	  project.instant[(parts[0] - 1)].color[parts[1]] = getColorFromHEX(g('c_color_rgb').value);
+    }
+  }
+}
+
+
+function managePosition(event){
+  var dot, eventDoc, doc, body, pageX, pageY;
+
+  event = event || window.event;
+
+  if (event.pageX == null && event.clientX != null) {
+    eventDoc = (event.target && event.target.ownerDocument) || document;
+    doc = eventDoc.documentElement;
+    body = eventDoc.body;
+
+    event.pageX = event.clientX +
+                 (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                 (doc && doc.clientLeft || body && body.clientLeft || 0);
+    event.pageY = event.clientY +
+                 (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+                 (doc && doc.clientTop  || body && body.clientTop  || 0 );
+  }
+
+  g('bubble').style.left = (event.pageX + 30) + "px";
+  g('bubble').style.top = (event.pageY - 200) + "px"
+}
+
+
+/**
+ * Side functions
+ */
+function updateColor(id, basic){
+  var parts = id.split("_");
+  
+  if(parts.length == 2)
+    g(id + "_rgb").value = g(id).value;
+  else if(parts.length == 3)
+    g(parts[0] + "_" + parts[1]).value = g(id).value;
+  
+  if(!basic)
+	project.effect.parameters.addColor(getColorFromHEX(g(id).value), parts[0]);
+}
+
+function getColorFromHEX(value){
+  return new Color(parseInt(value.substr(1, 2), 16), parseInt(value.substr(3, 2), 16), parseInt(value.substr(5, 2), 16));
+}
+
+function manageBlink(id){
+  e = g(id + '_blink');
+  
+  if(e.options[e.selectedIndex].value == 0){
+    //no blink
+    lock(id + '_timeon');
+    lock(id + '_timeoff');
+    lock(id + '_hz');
+    
+    //as there's no time blinking all is set to 0
+    g(id + '_timeon').value = 0;
+    g(id + '_timeoff').value = 0;
+    g(id + '_hz').value = 0;
+  }else if(e.options[e.selectedIndex].value == 1){
+    //time manager
+    unlock(id + '_timeon');
+    unlock(id + '_timeoff');
+    lock(id + '_hz');
+    
+    //recalculate hz.: 1000 / (timeon + timeoff)
+    g(id + '_hz').value = (1000 / (parseInt(g(id + '_timeon').value) + parseInt(g(id + '_timeoff').value)));
+  }else if(e.options[e.selectedIndex].value == 2){
+    //hz manager
+    lock(id + '_timeon');
+    lock(id + '_timeoff');
+    unlock(id + '_hz');
+        
+    //recalculate timeon and timeoff: 1000 / (hz * 2) for each (or 500 / hz)
+    g(id + '_timeon').value = 500 / parseInt(g(id + '_hz').value);
+    g(id + '_timeoff').value = 500 / parseInt(g(id + '_hz').value);
+  }
+  
+  project.effect.parameters.addBlink(e.options[e.selectedIndex].value, id);
+  project.effect.parameters.addTimeon(g(id + '_timeon').value, id);
+  project.effect.parameters.addTimeoff(g(id + '_timeoff').value, id);
+}
+
+function manageDuration(id){
+  project.effect.parameters.addDuration(g(id + '_timestep').value, id);
+}
+
+function addNode(){
+  var count = ++(project.effect.parameters.colorCount);
+  var nDiv = document.createElement("div");
+  nDiv.innerHTML = 
+  '<div><label for="' + count + '_color">Color: </label><input type="color" id="' + count + '_color" name="' + count + '_color" onchange="updateColor(\'' + count + '_color\');" value="#FFFFFF" />' +
+  '<input type="text" name="' + count + '_color_rgb" id="' + count + '_color_rgb" onchange="updateColor(\'' + count + '_color_rgb\');" value="#FFFFFF" /></div>' + 
+  '<div><label for="' + count + '_timestep">Time Step (ms): </label><input type="number" name="' + count + '_timestep" id="' + count + '_timestep" placeholder="1" onchange="manageDuration(' + count + ');" /></div>' +
+  '<div><label for="' + count + '_blink">Blink: </label><select name="' + count + '_blink" id="' + count + '_blink" onchange="manageBlink(' + count + ');"><option value="0">No blink</option><option value="1">Time manager</option><option value="2">Hz Manager</option></select></div>' + 
+  '<div><label for="' + count + '_timeon">Time on (ms): </label><input type="number" name="' + count + '_timeon" id="' + count + '_timeon" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink(' + count + ');" />' + 
+  '<label for="' + count + '_timeoff">Time off (ms): </label><input type="number" name="' + count + '_timeoff" id="' + count + '_timeoff" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink(' + count + ');" /></div>' + 
+  '<div><label for="' + count + '_hz">Hz: </label><input type="number" name="' + count + '_hz" id="' + count + '_hz" class="lock" style="pointer-events:none;" placeholder="1" onchange="manageBlink(' + count + ');" /></div>';
+  g('extra').appendChild(nDiv);
+}
+</script>
+</body>
+</html>

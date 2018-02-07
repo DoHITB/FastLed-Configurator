@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width">
   <title>FastLED Configurator</title> 
 <style type="text/css">
-body, input{
+body, input{ 
   font-family:arial;
   font-size:14px;
   padding:16px;
@@ -88,7 +88,8 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
 
 #bubble{
   width: 500px;
-  min-height:200px;
+  min-height:400px;
+  max-height:400px;
   background: #C5C5C5;
   border: 1px solid #555;
   position: absolute;
@@ -130,6 +131,16 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
 .column{
   margin-left: 8.1px;
 }
+
+#el_local, #el_vertical, #el_horizontal{
+  font-weight:700;
+  padding:15px;
+}
+
+#eventList{
+  max-height:200px;
+  overflow-y:auto;
+}
 </style>
 </head>
 <body>
@@ -142,7 +153,8 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
 	</div>
 	<div id="eventSelector">
 	    <label for="c_event">Event: </label>
-		<select name="c_event" id="c_event"><option value="">Coming Soon!</option></select>
+		<select name="c_event" id="c_event"><option value="">Select Event</option></select><input type="button" value="Add" id="event_add" onclick="addEvent(g('c_event').options[g('c_event').selectedIndex].value);" />
+		<div id="eventList"></div>
 	</div>
 	<input type="hidden" id="dummy" />
   </div>
@@ -216,7 +228,8 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
   </div>
   <div id="event">
     Coming Soon!<br /><br />
-    Here you can find a list of all Events you have setted up for your Instants.<br /><br /><br />
+    Here you can find a list of all Events you have setted up for your Instants.<br /><br />
+    Version 0.9 Note: While events are now shown, they're not yet implemented on the source code!<br /><br /><br />
   </div>
   <div id="wrap" onclick="handle('upload');">
     Upload
@@ -232,9 +245,9 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
     Here you have a list of upcoming improvements to do to this place.
     <ul>
       <li>Generate Event parts (basic events)</li>
-      <li>Finish Color part for vertical an horizontal selection</li>
+	  <li>Finish Color part for vertical an horizontal selection</li>
       <li>Finish "Blink" part to Alternate Color Line</li>
-      <li>Make Listeners</li>
+	  <li>Make Listeners</li>
       <li>Make hover desciptions</li>
       <li>Make languages work</li>
       <li>Make "Advanced" button functional</li>
@@ -244,6 +257,9 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
       <li>Study integration with more than one project handling (and merging)</li>
       <li>Do upload part</li>
     </ul>
+  </div>
+  <div id="footer">
+	<a href="https://github.com/DoHITB/FastLed-Configurator/blob/master/change.log" target="_blank">ChangeLog</a> | <a href="https://github.com/DoHITB/FastLed-Configurator/blob/master/README.md" target="_blank">ReadMe</a>
   </div>
 <script type="text/javascript">
 /*************************************************
@@ -256,8 +272,10 @@ project    = null;
 chipsets   = new Array("TM1803", "TM1804", "TM1809", "WS2811", "WS2812", "WS2812B", "GW6205", "GW6205_400", "UCS1903", "UCS1903B", /*"WS2801", "SM16716", "LPD8806", "WS2801", "SM16716", "LPD8806"*/);
 effects    = new Array("Color Line", "Alternate Color Line", "Color Race", "Alternate Color Race", "Fixed Color Blur", "Alternate Color Blur", "Running Color Blur", "Alternate Running Color Blur");
 parameters = new Array("CL", "ACL", "CR", "ACR", "FCB", "ACB", "RCB", "ARCB");
+events     = new Array("Random", "Blink");
 
 //NOTA: Arreglar tema errores, hay que revisarlo bien...
+//NOTA: Identar correctamente y documentar
 /**
  * OBJECT DECLARATION
  */
@@ -276,7 +294,7 @@ parameters = new Array("CL", "ACL", "CR", "ACR", "FCB", "ACB", "RCB", "ARCB");
   * Id: just to have project identified
   */
 function Project(chipset, name, pin){
-  this.version = "0.8 Beta";
+  this.version = "0.9 Beta";
   this.chipset = chipset;
   this.name    = name;
   this.pin     = pin
@@ -288,28 +306,22 @@ function Project(chipset, name, pin){
 }
 
 Project.prototype.add = function(obj){
-    if(obj instanceof LED){
-	  this.led.push(obj);
-    }else if(obj instanceof Event){
+    if(obj instanceof LED)
+	    this.led.push(obj);
+    else if(obj instanceof Event)
       this.event.push(obj);
-    }else if(obj instanceof Instant){
+    else if(obj instanceof Instant)
       this.instant.push(obj)
-    }else{
-      console.log("unknown object type");
-      console.log("Ref: #Padd001");
+    else
       return false;
-    }
-    
-    console.log("Object added");
+
     return true;
 };
 
 Project.prototype.getNewInstantID = function(){return "#I" + (this.instant.length + 1);};
 Project.prototype.getLEDNumber = function(){return this.led.length;};
 
-Project.prototype.check = function(){
-    console.log("Checking project...");
-    
+Project.prototype.check = function(){    
     if(this.checkLED() === false)
       return false;
     
@@ -320,35 +332,29 @@ Project.prototype.check = function(){
 };
 
 Project.prototype.checkLED = function(){
-    console.log("    1. Checking LED...")
     for(i = 0;i < this.led.length;i++)
       if(!this.led[i] instanceof LED)
         if(!this.led[i].check())
           return false;
-    
-    console.log("    ...ok!")
+ 
     return true;
 };
 
 Project.prototype.checkEvent = function(){
-    console.log("    2. Checking Events...");
     for(i = 0;i < this.event.length;i++)
       if(!this.event[i] instanceof Event)
         if(!this.event[i].check())
           return false;
     
-    console.log("    ...ok!");
     return true;
 };
 
 Project.prototype.checkInstants = function(){
-    console.log("    3. Checking Instants...")
     for(i = 0;i < this.instant.length;i++)
       if(!this.instant[i] instanceof Instant)
         if(!this.instant[i].check())
           return false;
     
-    console.log("   ...ok!");
     return true;
 };
 
@@ -432,22 +438,17 @@ function LED(id){
 }
 
 LED.prototype.add   = function(obj){
-    if(obj instanceof Event){
+    if(obj instanceof Event)
       this.event.push(obj);
-    }else{
-      console.log("unknown object type");
-      console.log("Ref: #Ladd001");
+    else
       return false;
-    }
-    
-    console.log("Object added");
+
     return true;
 };
   
 LED.prototype.check = function(){return true;};
 
 function Instant(id, position){
-  //attributes
   this.id       = id;
   this.position = position;
   this.led      = new Array();
@@ -460,19 +461,15 @@ function Instant(id, position){
 Instant.prototype.getId = function(){return this.id.substr(1);};
 
 Instant.prototype.add = function(obj){
-    if(obj instanceof LED){
+    if(obj instanceof LED)
       this.led.push(obj);
-    }else if(obj instanceof Color){
+    else if(obj instanceof Color)
       this.color.push(obj);
-    }else if(obj instanceof Event){
+    else if(obj instanceof Event)
       this.event.push(obj);
-    }else{
-      console.log("unknown object type");
-      console.log("Ref: #Iadd001");
+    else
       return false;
-    }
-    
-    console.log("Object added");
+ 
     return true;
 };
     
@@ -480,7 +477,6 @@ Instant.prototype.check = function(){
     if(this.duration <= 0)
       return false;
     
-    console.log("      Instant " + this.id + "...");
     return this.checkLED() && this.checkColor() && this.checkEvent();
 };
   
@@ -583,9 +579,15 @@ function Event(id, kind, name, parameters){
   this.parameters = parameters;
 }
 
-Event.prototype.check = function(){
-    console.log("      Event " + this.id + ": ok");
-    return true;
+Event.prototype.check = function(){return true;};
+
+Event.prototype.getHTML = function(){
+  if(this.kind === "Random"){
+    return '<div style="font-weight:initial;margin-left:25px;">Random</div>';
+  }else if(this.kind === "Blink"){
+    var hz = this.parameters[2].split("=");
+    return '<div style="font-weight:initial;margin-left:25px;">Blink @' + hz[1] + 'Hz</div>';
+  }
 };
 
 function Effect(id, kind){
@@ -611,14 +613,12 @@ Effect.prototype.getParameters = function(){
 };
   
 Effect.prototype.check = function(){
-    console.log("    2. Checking Effect...");
     if(this.id === "")
       return false;
     
     if(this.calculatedId === false) 
       return false;
     
-    console.log("    ...ok!");
     return true;
 };
   
@@ -819,7 +819,6 @@ function np(){
   e = g('chipset');
   
   if(newProject(e.options[e.selectedIndex].value, g('name').value, g('leds').value, g('pin').value)){
-    console.log("new project created");
     unlock("effect");
     unlock("instant");
     unlock("event");
@@ -830,10 +829,8 @@ function ne(){
   reset();
   e = g('s_effect');
   
-  if(newEffect(e.options[e.selectedIndex].value)){
-    console.log("new effect created");
+  if(newEffect(e.options[e.selectedIndex].value))
     updateScreen();
-  }
 }
 
 function newProject(chipset, name, ledNumber, pin){
@@ -854,8 +851,6 @@ function newInstant(position){
 
 function newEffect(id){
   if(!validateEffect(id)){
-    console.log("unkwnown effect type: " + id);
-    console.log("Ref: #NEve001")
     setError("NEve001");
     
     return false;
@@ -869,16 +864,12 @@ function newEffect(id){
 
 function createProject(chipset, name, pin){
   if(!validateChipset(chipset)){
-    console.log("unkwnown chipset type: " + chipset);
-    console.log("Ref: #CPvc001")
     setError("CPvc001");
     
     return false;
   }
   
   if(!validateName(name)){
-    console.log("wrong name: " + name);
-    console.log("Ref: #CPvc002")
     setError("CPvc002");
     
     return false;
@@ -966,6 +957,11 @@ function fillSelect(){
   
   for(i = 0;i < effects.length;i++)
     s.add(new Option(effects[i], effects[i]));
+	
+  s = g("c_event");
+  
+  for(i = 0;i < events.length;i++)
+    s.add(new Option(events[i], events[i]));
 }
 
 function g(id){return document.getElementById(id);}
@@ -1125,57 +1121,66 @@ function manageInstant(id, event){
   //move id to dummy
   g('dummy').value = id;
   
+  //refresh the event list
+  refreshBubbleEvent();
+  
   if(parts.length === 2){
     //x_all
-	//get most common color and event-set (row). If more than one option, set override warning
-	//if check is not selected do not show popup
-      if(!g(id).checked){
-        hide("bubble");
-        return false;
-      }
-	//unlock all
-	unlock('colorSelector');
-	unlock('eventSelector');
-  }else if(parts.length === 3){
-	if(parts[2] === 'c'){
-	  //0_x_c
-	  //get most common color and event-set (column). If more than one option, set override warning
+	  //get most common color and event-set (row). If more than one option, set override warning
 	  //if check is not selected do not show popup
+    if(!g(id).checked){
+      hide("bubble");
+      return false;
+    }
+        
+  	//unlock all
+	  unlock('colorSelector');
+	  unlock('eventSelector');
+    unlock('eventList');
+  }else if(parts.length === 3){
+	  if(parts[2] === 'c'){
+	    //0_x_c
+	    //get most common color and event-set (column). If more than one option, set override warning - review...
+	    //if check is not selected do not show popup
       if(!g(id).checked){
         hide("bubble");
         return false;
       }
-	  //unlock all
-	  unlock('colorSelector');
-	  unlock('eventSelector');
-	}else if(parts[2] === 'h'){
-	  //x_y_h
-	  //getEvent
+    
+	    //unlock all
+	    unlock('colorSelector');
+	    unlock('eventSelector');
+      unlock('eventList');
+	  }else if(parts[2] === 'h'){
+  	  //x_y_h
+	    //getEvent - review...
 	  
-	  //lock color, unlock event
-	  lock('colorSelector');
-	  unlock('eventSelector');
-	}else if(parts[2] === 'i'){
-	  //x_y_i
-	  //getColor
-	  var color = g(id).style.background.split("(");
-	  color = color[1].split(")");
-	  color = color[0].split(", ");
+  	  //lock color, unlock event
+	    lock('colorSelector');
+	    unlock('eventSelector');
+      unlock('eventList');
+	  }else if(parts[2] === 'i'){
+   	  //x_y_i
+	    //getColor
+	    var color = g(id).style.background.split("(");
+	    color = color[1].split(")");
+	    color = color[0].split(", ");
 	  
-	  for(i = 0;i < 3;i++)
-	    if(color[i] == 0)
-		  color[i] = "00";
-		else
-		  color[i] = parseInt(color[i]).toString(16).toUpperCase();
+	    for(i = 0;i < 3;i++)
+  	    if(color[i] == 0)
+		      color[i] = "00";
+		  else
+  		  color[i] = parseInt(color[i]).toString(16).toUpperCase();
 		  
-	  color = "#" + color[0] + color[1] + color[2];
-	  g('c_color_rgb').value = color;
-	  updateColor('c_color_rgb', true);
+	    color = "#" + color[0] + color[1] + color[2];
+  	  g('c_color_rgb').value = color;
+	    updateColor('c_color_rgb', true);
 	  
-	  //unlock color, lock event
-	  unlock('colorSelector');
-	  lock('eventSelector');
-	}
+  	  //unlock color, lock event
+	    unlock('colorSelector');
+	    lock('eventSelector');
+      lock('eventList');
+	  }
   }
 }
 
@@ -1194,19 +1199,138 @@ function crossUpdate(id){
 	//x_all
   }else if(parts.length === 3){
   	if(parts[2] === 'c'){
-	  //0_x_c
+	    //0_x_c
 
-	}else if(parts[2] === 'h'){
-	  //x_y_h
+	  }else if(parts[2] === 'h'){
+	    //x_y_h
 
-	}else if(parts[2] === 'i'){
-	  //x_y_i: update LED color.
-	  //Don't use "add", as a white LED may mess up everything
-	  project.instant[(parts[0] - 1)].color[parts[1]] = getColorFromHEX(g('c_color_rgb').value);
+	  }else if(parts[2] === 'i'){
+	    //x_y_i: update LED color.
+	    //Don't use "add", as a white LED may mess up everything
+	    project.instant[(parts[0] - 1)].color[parts[1]] = getColorFromHEX(g('c_color_rgb').value);
     }
   }
 }
 
+function addEvent(id){
+  //add specific data
+  var kind = "";
+  var parameters = Array();
+  var event = null;
+  
+  if(id == "Random"){
+	  kind = "Random";
+  }else if(id == "Blink"){
+	  kind = "Blink";
+	  parameters = ["Timeon=250", "Timeoff=250", "Hz=2"];
+  }else{
+  	return false;
+  }
+
+  //get the right counter, also allocate the Event
+  var count = 0;
+  var parts = g('dummy').value.split("_");
+  
+  if(parts.length === 2){
+	  //x_all: horizontal event
+	  count = (project.instant[(parts[0] - 1)].event.length);
+	  event = new Event('#E_' + count + '_' + kind, kind, count + '_' + kind, parameters);
+	  project.instant[(parts[0] - 1)].add(event);
+  }else if(parts.length === 3){
+  	if(parts[2] === 'c'){
+	    //0_x_c: vertical event
+	    count = (project.led[parts[1]].event.length);
+	    event = new Event('#E_' + count + '_' + kind, kind, count + '_' + kind, parameters);
+	    project.led[parts[1]].add(event);
+	  }else if(parts[2] === 'h'){
+	    //x_y_h:  local event. x = instant, y = led
+	    count = (project.instant[(parts[0] - 1)].led[parts[1]].event.length);
+	    event = new Event('#E_' + count + '_' + kind, kind, count + '_' + kind, parameters);
+	    project.instant[(parts[0] - 1)].led[parts[1]].add(event);
+	  }else if(parts[2] === 'i'){
+	    //x_y_i: input... can't set any event here!
+	    return false;
+    }
+  }
+  
+  refreshBubbleEvent();
+  return true;
+}
+
+function refreshBubbleEvent(){
+  //Empty content from EventList
+  g('eventList').innerHTML = '';
+	
+  /*
+   * Load all events related with selected Item:
+   * 	For vertical events: Show vertical Events on that column
+   *	For horizontal events: Show horizontal Events on that row
+   *	For local events: Show all local events for that instant-led, then all vertical, then all horizontal regarding that position
+   */
+  var parts       = g('dummy').value.split("_");
+  var vertical    = null;
+  var horizontal  = null;
+  var local       = null;
+  var i           = 0;
+  
+  if(parts.length === 2){
+	  //x_all: horizontal event
+	  horizontal  = project.instant[(parts[0] - 1)].event;
+    lHorizontal = true;
+  }else if(parts.length === 3){
+  	if(parts[2] === 'c'){
+	    //0_x_c: vertical event
+	    vertical  = project.led[parts[1]].event;
+      lVertical = true;
+	  }else if(parts[2] === 'h'){
+	    //x_y_h:  local event. x = instant, y = led
+	    local      = project.instant[(parts[0] - 1)].led[parts[1]].event;
+      vertical   = project.led[parts[1]].event;
+      horizontal = project.instant[(parts[0] - 1)].event;
+      lLocal     = true;
+	  }else if(parts[2] === 'i'){
+	    //x_y_h:  local event. x = instant, y = led
+	    local      = project.instant[(parts[0] - 1)].led[parts[1]].event;
+      vertical   = project.led[parts[1]].event;
+      horizontal = project.instant[(parts[0] - 1)].event;
+      lLocal     = true;
+    }
+  }
+  
+  //put all events in order (local, horizontal, vertical)
+  if(local !== null){
+    var nDiv = document.createElement("div");
+    nDiv.id = "el_local";
+    nDiv.innerHTML = '<div id="el_local_h">Local Events</div>';
+    
+    for(i = 0;i < local.length;i++)
+      nDiv.innerHTML += local[i].getHTML();
+    
+    g('eventList').appendChild(nDiv);
+  }
+  
+  if(horizontal !== null){
+    var nDiv = document.createElement("div");
+    nDiv.id = "el_horizontal";
+    nDiv.innerHTML = '<div id="el_horizontal_h">Horizontal Events</div>';
+    
+    for(i = 0;i < horizontal.length;i++)
+      nDiv.innerHTML += horizontal[i].getHTML();
+    
+    g('eventList').appendChild(nDiv);
+  }
+  
+    if(vertical !== null){
+    var nDiv = document.createElement("div");
+    nDiv.id = "el_vertical";
+    nDiv.innerHTML = '<div id="el_vertical_h">Vertical Events</div>';
+    
+    for(i = 0;i < vertical.length;i++)
+      nDiv.innerHTML += vertical[i].getHTML();
+    
+    g('eventList').appendChild(nDiv);
+  }
+}
 
 function managePosition(event){
   var dot, eventDoc, doc, body, pageX, pageY;

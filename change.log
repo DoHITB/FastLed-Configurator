@@ -8,3 +8,5 @@
 [07/02/2018 - 19.59]: Vertical Event type "Random" is now functional - ToDo: add srand on setup.
 [07/02/2018 - 20.04]: Vertical Event type "Random" is now fully functional.
 -- VERSION 0.10 (BETA) STARTS --
+[07/02/2018 - 20.26]: Horizontal Event type "Random" is now fully functional.
+-- VERSION 0.11 (BETA) STARTS --

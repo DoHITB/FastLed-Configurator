@@ -109,6 +109,7 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
   border: 1px solid #757575;
   display: inline-flex;
   margin-top: 15px;
+  margin-right: 30px;
 }
 
 .holder{
@@ -275,7 +276,6 @@ parameters = new Array("CL", "ACL", "CR", "ACR", "FCB", "ACB", "RCB", "ARCB");
 events     = new Array("Random", "Blink");
 
 //NOTA: Arreglar tema errores, hay que revisarlo bien...
-//NOTA: Identar correctamente y documentar
 /**
  * OBJECT DECLARATION
  */
@@ -294,7 +294,7 @@ events     = new Array("Random", "Blink");
   * Id: just to have project identified
   */
 function Project(chipset, name, pin){
-  this.version = "0.9 Beta";
+  this.version = "0.10 Beta";
   this.chipset = chipset;
   this.name    = name;
   this.pin     = pin
@@ -306,91 +306,92 @@ function Project(chipset, name, pin){
 }
 
 Project.prototype.add = function(obj){
-    if(obj instanceof LED)
-	    this.led.push(obj);
-    else if(obj instanceof Event)
-      this.event.push(obj);
-    else if(obj instanceof Instant)
-      this.instant.push(obj)
-    else
-      return false;
+  if(obj instanceof LED)
+    this.led.push(obj);
+  else if(obj instanceof Event)
+    this.event.push(obj);
+  else if(obj instanceof Instant)
+    this.instant.push(obj)
+  else
+    return false;
 
-    return true;
+  return true;
 };
 
 Project.prototype.getNewInstantID = function(){return "#I" + (this.instant.length + 1);};
 Project.prototype.getLEDNumber = function(){return this.led.length;};
 
 Project.prototype.check = function(){    
-    if(this.checkLED() === false)
-      return false;
-    
-    if(this.effect instanceof Effect)
-      return this.effect.check();
-    
-    return (this.checkEvent() && this.checkInstants());
+  if(this.checkLED() === false)
+    return false;
+
+  if(this.effect instanceof Effect)
+    return this.effect.check();
+
+  return (this.checkEvent() && this.checkInstants());
 };
 
 Project.prototype.checkLED = function(){
-    for(i = 0;i < this.led.length;i++)
-      if(!this.led[i] instanceof LED)
-        if(!this.led[i].check())
-          return false;
- 
-    return true;
+  for(i = 0;i < this.led.length;i++)
+    if(!this.led[i] instanceof LED)
+      if(!this.led[i].check())
+        return false;
+
+  return true;
 };
 
 Project.prototype.checkEvent = function(){
-    for(i = 0;i < this.event.length;i++)
-      if(!this.event[i] instanceof Event)
-        if(!this.event[i].check())
-          return false;
-    
-    return true;
+  for(i = 0;i < this.event.length;i++)
+    if(!this.event[i] instanceof Event)
+      if(!this.event[i].check())
+        return false;
+
+  return true;
 };
 
 Project.prototype.checkInstants = function(){
-    for(i = 0;i < this.instant.length;i++)
-      if(!this.instant[i] instanceof Instant)
-        if(!this.instant[i].check())
-          return false;
-    
-    return true;
+  for(i = 0;i < this.instant.length;i++)
+    if(!this.instant[i] instanceof Instant)
+      if(!this.instant[i].check())
+        return false;
+
+  return true;
 };
 
 Project.prototype.getSource = function(){
-    grt=[];
-	grt.push('/**\r\n');
-	grt.push(' * Code downloaded via FastLED Configurator\r\n');
-	grt.push(' * Author: David O. Sole (DoHITB)\r\n');
-	grt.push(' * Version: ' + this.version + '\r\n');
-	grt.push(' * Find DoHITB on Twitter @dohitb\r\n');
-	grt.push(' * DoHITB website: escepticismoilustrado.blogspot.com\r\n');
-	grt.push(' * Dohhell Cosplay: facebook.com/meryhelldohitb/\r\n');
-	grt.push(' */\r\n\r\n');
-    grt.push('//headers\r\n');
-    grt.push('#include <FastLED.h>\r\n');
-    grt.push('#include <stdlib.h>\r\n\r\n');
-    grt.push('//LED Declaration\r\n');
-    grt.push('CRGB leds['+ this.led.length + '];\r\n\r\n');
-    grt.push('//specific variables\r\n');
-    grt.push(this.getVariables());
-    grt.push('//setup\r\n');
-    grt.push('void setup() {\r\n');
-    grt.push(this.getAddLeds());
-    grt.push('}\r\n\r\n');
-    grt.push('//loop\r\n');
-    grt.push('void loop(){\r\n');
-    grt.push(this.getSourceCode());
-    grt.push('}\r\n\r\n');
+  grt=[];
+  grt.push('/**\r\n');
+  grt.push(' * Code downloaded via FastLED Configurator\r\n');
+  grt.push(' * Author: David O. Sole (DoHITB)\r\n');
+  grt.push(' * Version: ' + this.version + '\r\n');
+  grt.push(' * Find DoHITB on Twitter @dohitb\r\n');
+  grt.push(' * DoHITB website: escepticismoilustrado.blogspot.com\r\n');
+  grt.push(' * Dohhell Cosplay: facebook.com/meryhelldohitb/\r\n');
+  grt.push(' */\r\n\r\n');
+  grt.push('//headers\r\n');
+  grt.push('#include <FastLED.h>\r\n');
+  grt.push('#include <stdlib.h>\r\n\r\n');
+  grt.push('//LED Declaration\r\n');
+  grt.push('CRGB leds['+ this.led.length + '];\r\n\r\n');
+  grt.push('//specific variables\r\n');
+  grt.push(this.getVariables());
+  grt.push('//setup\r\n');
+  grt.push('void setup() {\r\n');
+  grt.push(this.getAddLeds());
+  grt.push('    srand(' + new Date().getTime() + ');\r\n');
+  grt.push('}\r\n\r\n');
+  grt.push('//loop\r\n');
+  grt.push('void loop(){\r\n');
+  grt.push(this.getSourceCode());
+  grt.push('}\r\n\r\n');
 
-	this.dlf(new Blob(grt,{type:'text/plain'}), this.name); 
+  this.dlf(new Blob(grt,{type:'text/plain'}), this.name); 
 };
 
 Project.prototype.dlf = function(b, n){
 	dlfr=new FileReader();
 	dlfr.onload=function(event){dlfs=document.createElement('a');
-							    dlfs.href=event.target.result;
+							  dlfs.href=event.target.result;
 								dlfs.target='_blank';
 								dlfs.download=n + '.ino';
 								dlfc=new MouseEvent('click',{'view':window,'bubbles':true,'cancelable':true});
@@ -409,27 +410,27 @@ Project.prototype.getAddLeds = function(){
 }  
 
 Project.prototype.getSourceCode = function(){
-    str = "";
-    
-    if(this.effect instanceof Effect)
-      str = this.effect.getSourceCode(); 
-    else
-      for(i = 0;i < this.instant.length;i++)
-        str += this.instant[i].getSourceCode();
-    
-    return str;
+  str = "";
+
+  if(this.effect instanceof Effect)
+    str = this.effect.getSourceCode(); 
+  else
+    for(i = 0;i < this.instant.length;i++)
+      str += this.instant[i].getSourceCode();
+
+  return str;
 };
 
 Project.prototype.getVariables = function(){
-    str = "";
-    
-    if(this.effect instanceof Effect)
-      str = this.effect.getVariables();
-    else
-      for(i = 0;i < this.instant.length;i++)
-        str += this.instant[i].getVariables();
-    
-    return str;
+  str = "";
+  
+  if(this.effect instanceof Effect)
+    str = this.effect.getVariables();
+  else
+    for(i = 0;i < this.instant.length;i++)
+      str += this.instant[i].getVariables();
+  
+  return str;
 };
 
 function LED(id){
@@ -438,12 +439,12 @@ function LED(id){
 }
 
 LED.prototype.add   = function(obj){
-    if(obj instanceof Event)
-      this.event.push(obj);
-    else
-      return false;
+  if(obj instanceof Event)
+    this.event.push(obj);
+  else
+    return false;
 
-    return true;
+  return true;
 };
   
 LED.prototype.check = function(){return true;};
@@ -461,50 +462,50 @@ function Instant(id, position){
 Instant.prototype.getId = function(){return this.id.substr(1);};
 
 Instant.prototype.add = function(obj){
-    if(obj instanceof LED)
-      this.led.push(obj);
-    else if(obj instanceof Color)
-      this.color.push(obj);
-    else if(obj instanceof Event)
-      this.event.push(obj);
-    else
-      return false;
- 
-    return true;
+  if(obj instanceof LED)
+    this.led.push(obj);
+  else if(obj instanceof Color)
+    this.color.push(obj);
+  else if(obj instanceof Event)
+    this.event.push(obj);
+  else
+    return false;
+
+  return true;
 };
     
 Instant.prototype.check = function(){
-    if(this.duration <= 0)
-      return false;
-    
-    return this.checkLED() && this.checkColor() && this.checkEvent();
+  if(this.duration <= 0)
+    return false;
+  
+  return this.checkLED() && this.checkColor() && this.checkEvent();
 };
   
 Instant.prototype.checkLED = function(){
-    for(i = 0;i < this.led.length;i++)
-      if(!this.led[i] instanceof LED)
-        if(!this.led[i].check())
-          return false;
-    
-    return true;
+  for(i = 0;i < this.led.length;i++)
+    if(!this.led[i] instanceof LED)
+      if(!this.led[i].check())
+        return false;
+  
+  return true;
 };
   
 Instant.prototype.checkColor = function(){
-    for(i = 0;i < this.color.length;i++)
-      if(!this.color[i] instanceof Color)
-        if(!this.color[i].check())
-          return false;
-    
-    return true;
+  for(i = 0;i < this.color.length;i++)
+    if(!this.color[i] instanceof Color)
+      if(!this.color[i].check())
+        return false;
+  
+  return true;
 }
 
 Instant.prototype.checkEvent = function(){
-    for(i = 0;i < this.event.length;i++)
-      if(!this.event[i] instanceof Event)
-        if(!this.event[i].check())
-          return false;
-    
-    return true;
+  for(i = 0;i < this.event.length;i++)
+    if(!this.event[i] instanceof Event)
+      if(!this.event[i].check())
+        return false;
+  
+  return true;
 };
 
 Instant.prototype.getVariables = function(){
@@ -537,14 +538,29 @@ Instant.prototype.getVariables = function(){
 
 Instant.prototype.getSourceCode = function(){
   var ret = Array();
+  var eve = null;
   var i   = 0;
+  var j   = 0;
   
   ret.push("//Code from Instant " + this.id);
-  
   ret.push('//  base color');
   ret.push('//  loop for each led, then set base color:');
   ret.push('    for(' + this.getId() + '_i = 0;' + this.getId() + '_i < ' + this.led.length + ';' + this.getId() + '_i++)');
   ret.push('        leds[' + this.getId() + '_i] = CRGB(' + this.getId() + '_r[' + this.getId() + '_i], ' + this.getId() + '_g[' + this.getId() + '_i], ' + this.getId() + '_b[' + this.getId() + '_i]);\r\n');
+  ret.push('//  apply events');  
+  ret.push('//  vertical events');
+  
+  for(i = 0;i < project.led.length;i++){
+    eve = project.led[i].event;
+    
+    for(j = 0;j < eve.length;j++){
+      ret.push('//  vertical event ' + eve[j].id);
+      ret.push('    leds[' + i + '] = ' + eve[j].getSourceCode() + ';');
+    }
+  }
+  
+  ret.push('//  horizontal events');
+  ret.push('//  local events');
   ret.push('    FastLED.show();');
   ret.push('    delay(' + this.duration + ');\r\n\r\n');
   
@@ -558,16 +574,16 @@ function Color(r, g, b){
 }
 
 Color.prototype.check = function(){
-    if(this.r < 0 || this.r > 255)
-      return false;
-    
-    if(this.g < 0 || this.g > 255)
-      return false;
-    
-    if(this.b < 0 || this.b > 255)
-      return false;
-    
-    return true;
+  if(this.r < 0 || this.r > 255)
+    return false;
+  
+  if(this.g < 0 || this.g > 255)
+    return false;
+  
+  if(this.b < 0 || this.b > 255)
+    return false;
+  
+  return true;
 };
 
 function Event(id, kind, name, parameters){
@@ -590,6 +606,12 @@ Event.prototype.getHTML = function(){
   }
 };
 
+Event.prototype.getSourceCode = function(){
+  if(this.kind === "Random"){
+    return 'CRGB(rand() % 256, rand() % 256, rand() % 256)';
+  }
+};
+
 function Effect(id, kind){
   this.id         = id;
   this.kind       = kind;
@@ -597,29 +619,29 @@ function Effect(id, kind){
 }
 
 Effect.prototype.calculateId = function(){
-    for(i = 0;i < effects.length;i++)
-      if(this.kind == effects[i])
-        return i;
-    
-    return false;
+  for(i = 0;i < effects.length;i++)
+    if(this.kind == effects[i])
+      return i;
+  
+  return false;
 };
   
 Effect.prototype.getParameters = function(){
-    try{
-        eval("this.parameters = new " + parameters[this.calculateId()] + "();");
-    }catch(err){
-      return false;
-    }
+  try{
+    eval("this.parameters = new " + parameters[this.calculateId()] + "();");
+  }catch(err){
+    return false;
+  }
 };
   
 Effect.prototype.check = function(){
-    if(this.id === "")
-      return false;
-    
-    if(this.calculatedId === false) 
-      return false;
-    
-    return true;
+  if(this.id === "")
+    return false;
+  
+  if(this.calculatedId === false) 
+    return false;
+  
+  return true;
 };
   
 Effect.prototype.getVariables = function(){return this.parameters.getVariables();};
@@ -973,11 +995,10 @@ function handle(id){
   eval("div_" + id + "++;");
   eval("temp = div_" + id + " % 2;");
   
-  if(temp === 0){
+  if(temp === 0)
     show(id);
-  }else{
+  else
     hide(id);
-  }
 } 
 
 function setError(id){
@@ -988,15 +1009,14 @@ function setError(id){
    */
   e = null;
   
-  if(id == "CPvc001"){
+  if(id == "CPvc001")
     e = g('chipset');
-  }else if(id == "CPvc002"){
+  else if(id == "CPvc002")
     e = g('name');
-  }else if(id == "NEve001"){
+  else if(id == "NEve001")
     e = g('s_effect');
-  }else{
+  else
     e = false;
-  }
   
   if(!e)
     return false;
@@ -1024,11 +1044,10 @@ function updateScreen(){
     unlock("event");
   }
   
-  if(project.check()){
+  if(project.check())
     generateButton();
-  }else{
+  else
     npButton();
-  }
 }
 
 function generateButton(){
@@ -1081,11 +1100,10 @@ function addInstant(){
     str = "";
     
     for(i = 0;i < lim;i++){
-      if(i === 0){
+      if(i === 0)
         str += '<input type="checkbox" style="margin-left:33px;" class="column" name="0_' + i + '_c" id="0_' + i + '_c" onclick="manageInstant(\'0_' + i + '_c\', event);cancelBubble(event)" /> ';
-      }else{
+      else
         str += '<input type="checkbox" class="column" name="0_' + i + '_c" id="0_' + i + '_c" onclick="manageInstant(\'0_' + i + '_c\', event);cancelBubble(event)" /> ';
-      }
     }
     
     header.innerHTML = str;
@@ -1095,11 +1113,10 @@ function addInstant(){
   var nDiv = document.createElement("div");
   str = '<div><input type="checkbox" name="' + count + '_all" id="' + count + '_all" onclick="manageInstant(\'' + count + '_all\', event);cancelBubble(event)" /><div class="strip">';
   
-  for(i = 0;i < lim;i++){
+  for(i = 0;i < lim;i++)
     str += '<div class="holder" id="' + count + '_' + i + '_h" onclick="manageInstant(\'' + count + '_' + i + '_h\', event);cancelBubble(event);"><div class="inside" style="background:#FFFFFF;" id="' + count + '_' + i + '_i" onclick="manageInstant(\'' + count + '_' + i + '_i\', event);cancelBubble(event);"></div></div>';
-  }
   
-  str += '</div><label for="' + count + '_duration">Duration (ms): </label><input type="number" name="' + count + '_duration" id="' + count + '_duration" onchange="manageInstantDuration(\'' + count + '_duration\');cancelBubble(event);" /></div>';
+  str += '</div><label for="' + count + '_duration">Duration (ms): </label><input type="number" name="' + count + '_duration" id="' + count + '_duration" onchange="manageInstantDuration(\'' + count + '_duration\');cancelBubble(event);" placeholder="1" /></div>';
   nDiv.innerHTML = str;
   g('instants').appendChild(nDiv);
   newInstant(count);
@@ -1185,9 +1202,10 @@ function manageInstant(id, event){
 }
 
 function cancelBubble(e){
-    e.cancelBubble = true;
-    if(e.stopPropagation)
-     e.stopPropagation();
+  e.cancelBubble = true;
+  
+  if(e.stopPropagation)
+    e.stopPropagation();
 }
 
 function crossUpdate(id){
@@ -1276,24 +1294,20 @@ function refreshBubbleEvent(){
   if(parts.length === 2){
 	  //x_all: horizontal event
 	  horizontal  = project.instant[(parts[0] - 1)].event;
-    lHorizontal = true;
   }else if(parts.length === 3){
   	if(parts[2] === 'c'){
 	    //0_x_c: vertical event
 	    vertical  = project.led[parts[1]].event;
-      lVertical = true;
 	  }else if(parts[2] === 'h'){
 	    //x_y_h:  local event. x = instant, y = led
 	    local      = project.instant[(parts[0] - 1)].led[parts[1]].event;
       vertical   = project.led[parts[1]].event;
       horizontal = project.instant[(parts[0] - 1)].event;
-      lLocal     = true;
 	  }else if(parts[2] === 'i'){
 	    //x_y_h:  local event. x = instant, y = led
 	    local      = project.instant[(parts[0] - 1)].led[parts[1]].event;
       vertical   = project.led[parts[1]].event;
       horizontal = project.instant[(parts[0] - 1)].event;
-      lLocal     = true;
     }
   }
   

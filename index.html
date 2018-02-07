@@ -294,7 +294,7 @@ events     = new Array("Random", "Blink");
   * Id: just to have project identified
   */
 function Project(chipset, name, pin){
-  this.version = "0.10 Beta";
+  this.version = "0.11 Beta";
   this.chipset = chipset;
   this.name    = name;
   this.pin     = pin
@@ -559,7 +559,18 @@ Instant.prototype.getSourceCode = function(){
     }
   }
   
+  ret.push('');
   ret.push('//  horizontal events');
+  
+  eve = this.event;
+  
+  for(i = 0;i < eve.length;i++){
+    ret.push('//  horizonal event ' + eve[i].id);
+    ret.push('    for(' + this.getId() + '_i = 0;' + this.getId() + '_i < ' + this.led.length + ';' + this.getId() + '_i++)');
+    ret.push('        leds[' + this.getId() + '_i] = ' + eve[i].getSourceCode() + ';');
+  }
+  
+  ret.push('');
   ret.push('//  local events');
   ret.push('    FastLED.show();');
   ret.push('    delay(' + this.duration + ');\r\n\r\n');

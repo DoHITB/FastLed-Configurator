@@ -2,3 +2,4 @@
 [07/02/2018 - 11.08]: Added footer on index.html, referencing changeLog and ReadMe.
 [07/02/2018 - 11.17]: Added Basic event List.
 [07/02/2018 - 12.34]: Basic Event can be added (Basic = Random, Blink). Still not shown on bubble.
+[07/02/2018 - 16.18]: Basic Event are now shown on bubble. Still not included on source code nor on event list 

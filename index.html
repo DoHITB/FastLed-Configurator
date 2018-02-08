@@ -230,7 +230,7 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
   <div id="event">
     Coming Soon!<br /><br />
     Here you can find a list of all Events you have setted up for your Instants.<br /><br />
-    Version 0.9 Note: While events are now shown, they're not yet implemented on the source code!<br /><br /><br />
+    Version 0.12 Note: Only "Random" event works by now!<br /><br /><br />
   </div>
   <div id="wrap" onclick="handle('upload');">
     Upload
@@ -294,7 +294,7 @@ events     = new Array("Random", "Blink");
   * Id: just to have project identified
   */
 function Project(chipset, name, pin){
-  this.version = "0.11 Beta";
+  this.version = "0.12 Beta";
   this.chipset = chipset;
   this.name    = name;
   this.pin     = pin
@@ -572,6 +572,17 @@ Instant.prototype.getSourceCode = function(){
   
   ret.push('');
   ret.push('//  local events');
+  
+  for(i = 0;i < this.led.length;i++){
+    eve = this.led[i].event;
+    
+    for(j = 0;j < eve.length;j++){
+      ret.push('//  local event ' + eve[j].id);
+      ret.push('    leds[' + i + '] = ' + eve[j].getSourceCode() + ';');
+    }
+  }
+  
+  ret.push('');
   ret.push('    FastLED.show();');
   ret.push('    delay(' + this.duration + ');\r\n\r\n');
   

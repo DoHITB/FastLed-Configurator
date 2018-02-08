@@ -142,6 +142,16 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
   max-height:200px;
   overflow-y:auto;
 }
+
+.el_led, .el_instant{
+  margin-left: 20px;
+  margin-bottom: 5px;
+}
+
+.el_instant_led{
+  margin-left: 22px;
+  margin-bottom: 5px;
+}
 </style>
 </head>
 <body>
@@ -228,9 +238,8 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
     Events
   </div>
   <div id="event">
-    Coming Soon!<br /><br />
     Here you can find a list of all Events you have setted up for your Instants.<br /><br />
-    Version 0.12 Note: Only "Random" event works by now!<br /><br /><br />
+    <div id="eventAll"></div>
   </div>
   <div id="wrap" onclick="handle('upload');">
     Upload
@@ -245,10 +254,9 @@ input[type=checkbox]:active, input[type=checkbox]:checked{
   <div id="next">
     Here you have a list of upcoming improvements to do to this place.
     <ul>
-      <li>Generate Event parts (basic events)</li>
-	  <li>Finish Color part for vertical an horizontal selection</li>
+	    <li>Finish Color part for vertical an horizontal selection</li>
       <li>Finish "Blink" part to Alternate Color Line</li>
-	  <li>Make Listeners</li>
+	    <li>Make Listeners</li>
       <li>Make hover desciptions</li>
       <li>Make languages work</li>
       <li>Make "Advanced" button functional</li>
@@ -273,7 +281,7 @@ project    = null;
 chipsets   = new Array("TM1803", "TM1804", "TM1809", "WS2811", "WS2812", "WS2812B", "GW6205", "GW6205_400", "UCS1903", "UCS1903B", /*"WS2801", "SM16716", "LPD8806", "WS2801", "SM16716", "LPD8806"*/);
 effects    = new Array("Color Line", "Alternate Color Line", "Color Race", "Alternate Color Race", "Fixed Color Blur", "Alternate Color Blur", "Running Color Blur", "Alternate Running Color Blur");
 parameters = new Array("CL", "ACL", "CR", "ACR", "FCB", "ACB", "RCB", "ARCB");
-events     = new Array("Random", "Blink");
+events     = new Array("Random"/*, "Blink"*/);
 
 //NOTA: Arreglar tema errores, hay que revisarlo bien...
 /**
@@ -294,7 +302,7 @@ events     = new Array("Random", "Blink");
   * Id: just to have project identified
   */
 function Project(chipset, name, pin){
-  this.version = "0.12 Beta";
+  this.version = "0.13 Beta";
   this.chipset = chipset;
   this.name    = name;
   this.pin     = pin
@@ -305,6 +313,12 @@ function Project(chipset, name, pin){
   this.id      = "#P" + this.name;
 }
 
+/**
+ * Method add: adds an object to it's array
+ * depending on its instance.
+ *
+ * Returns true if can be added, false otherwise.
+ */
 Project.prototype.add = function(obj){
   if(obj instanceof LED)
     this.led.push(obj);
@@ -555,7 +569,7 @@ Instant.prototype.getSourceCode = function(){
     
     for(j = 0;j < eve.length;j++){
       ret.push('//  vertical event ' + eve[j].id);
-      ret.push('    leds[' + i + '] = ' + eve[j].getSourceCode() + ';');
+      ret.push(eve[j].getSourceCode('    leds[' + i + '] = ', 'horizontal', this, [i]));
     }
   }
   
@@ -567,7 +581,7 @@ Instant.prototype.getSourceCode = function(){
   for(i = 0;i < eve.length;i++){
     ret.push('//  horizonal event ' + eve[i].id);
     ret.push('    for(' + this.getId() + '_i = 0;' + this.getId() + '_i < ' + this.led.length + ';' + this.getId() + '_i++)');
-    ret.push('        leds[' + this.getId() + '_i] = ' + eve[i].getSourceCode() + ';');
+    ret.push(eve[i].getSourceCode('        leds[' + this.getId() + '_i] = ', 'vertical', this, [i]));
   }
   
   ret.push('');
@@ -578,7 +592,7 @@ Instant.prototype.getSourceCode = function(){
     
     for(j = 0;j < eve.length;j++){
       ret.push('//  local event ' + eve[j].id);
-      ret.push('    leds[' + i + '] = ' + eve[j].getSourceCode() + ';');
+      ret.push(eve[j].getSourceCode('    leds[' + i + '] = ', 'local', this, [i]));
     }
   }
   
@@ -628,9 +642,43 @@ Event.prototype.getHTML = function(){
   }
 };
 
-Event.prototype.getSourceCode = function(){
+
+/*
+ * Usage of "p"
+ *
+ * - Blink
+ *   * p[0] = Current led
+ */
+Event.prototype.getSourceCode = function(text, mode, instant, p){
   if(this.kind === "Random"){
-    return 'CRGB(rand() % 256, rand() % 256, rand() % 256)';
+    return text + 'CRGB(rand() % 256, rand() % 256, rand() % 256);';
+  }else if(this.kind === "Blink"){
+    return '';
+    /*var hz = this.parameters[2].split("=");
+    
+    //calculate how many times it will pop in and out, as Hz are in sync with timeon/timeoff.
+    var steps = instant.duration / hz[1];
+    
+    //for blinking we need to take care if we're using horizontal events or not.
+    if(mode === "horizontal"){
+    }else if(mode === "vertical" || mode === "local"){
+      //here we're treating a single led.
+      var hz = this.parameters[2].split('=');
+      var timeon = this.parameters[0].split('=');
+      var timeoff = this.parameters[1].split('=');
+      
+      //as "hz" are sync with timeon/timeoff, we can get the step numbers easily.
+      var steps = instant.duration * hz[1] / 500;
+      
+      return '    for(' + instant.getId() + '_i = 0;' + instant.getId() + '_i < ' + steps + ';' + instant.getId() + '_i++){\r\n' +
+             '    ' + text + 'CRGB((pow(' + instant.getId() + '_r[' + p[0] + '], (' + instant.getId() + '_i % 2)) - (' + instant.getId() + '_i - 1) % 2), (pow(' + instant.getId() + '_g[' + p[0] + '], (' + instant.getId() + '_i % 2)) - (' + instant.getId() + '_i - 1) % 2), (pow(' + instant.getId() + '_b[' + p[0] + '], (' + instant.getId() + '_i % 2)) - (' + instant.getId() + '_i - 1) % 2));\r\n' + 
+             '        FastLED.show();\r\n\r\n' + 
+             '        if(x_s % 2 == 1)\r\n' +
+             '            delay(' + timeon[1] + ');\r\n' +
+             '        else\r\n' + 
+             '            delay(' + timeoff[1] + ');\r\n' +
+             '    }';
+    }*/
   }
 };
 
@@ -1294,6 +1342,7 @@ function addEvent(id){
   }
   
   refreshBubbleEvent();
+  refreshEventList();
   return true;
 }
 
@@ -1366,6 +1415,58 @@ function refreshBubbleEvent(){
     
     g('eventList').appendChild(nDiv);
   }
+}
+
+function refreshEventList(){
+  var i   = 0;
+  var j   = 0;
+  var k   = 0;
+  var str = '';
+  
+  g('eventAll').innerHTML = '';
+  
+  //vertical events
+  str += '<div id="el_vertical">Vertical Events</div>';
+  
+  for(i = 0;i < project.led.length;i++){
+    str += '<div class="el_led">For LED: ' + project.led[i].id + '</div>';
+    
+    for(j = 0;j < project.led[i].event.length;j++)
+      str += '<div class="el_event">' + project.led[i].event[j].getHTML() + '</div>';
+  }
+  
+  str += '</div>';
+  
+  //horizontal events
+  str += '<div id="el_horizontal">Horizontal Events</div>';
+  
+  for(i = 0;i < project.instant.length;i++){
+    str += '<div class="el_instant">For Instant: ' + project.instant[i].id + '</div>';
+    
+    for(j = 0;j < project.instant[i].event.length;j++)
+      str += '<div class="el_event">' + project.instant[i].event[j].getHTML() + '</div>';
+  }
+  
+  str += '</div>';
+  
+  //local events
+  str += '<div id="el_local">Local Events</div>';
+  
+  for(i = 0;i < project.instant.length;i++){
+    str += '<div class="el_instant">For Instant: ' + project.instant[i].id + '</div>';
+    
+    for(j = 0;j < project.instant[i].led.length;j++){
+      str += '<div class="el_instant_led">For LED: ' + project.instant[i].led[j].id + '</div>';
+      
+      for(k = 0;k < project.instant[i].led[j].event.length;k++)
+        str += '<div class="el_event">' + project.instant[i].led[j].event[k].getHTML() + '</div>';
+    }
+  }
+  
+  str += '</div>';
+ 
+
+  g('eventAll').innerHTML = str;
 }
 
 function managePosition(event){

@@ -12,3 +12,5 @@
 -- VERSION 0.11 (BETA) STARTS --
 [08/02/2018 - 15.25]: Event "Random" is fully functional - pending to show it on "Event" section.
 -- VERSION 0.12 (BETA) STARTS --
+08/02/2018 - 17.24]: Event List works now. "Blink" event in hiatus due it's complexity.
+-- VERSION 0.13 (BETA) STARTS --
